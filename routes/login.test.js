@@ -59,7 +59,7 @@ describe("/login", () => {
         });
         expect(res.statusCode).toEqual(400);
       });
-      it("should return 200 and with a password", async () => {
+      it("should return 200 with a password", async () => {
         const res = await request(server).post("/login/signup").send(user1);
         expect(res.statusCode).toEqual(200);
       });
@@ -73,7 +73,7 @@ describe("/login", () => {
         await request(server).post("/login/signup").send(user0);
         const users = await User.find().lean();
         users.forEach((user) => {
-          expect(Object.values(user).includes(user0.password)).toBe(false);
+          expect(Object.values(user)).not.toContain(user0.password);
         });
       });
     });
