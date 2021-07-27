@@ -14,9 +14,6 @@ module.exports.createUser = async (userObj) => {
 
 // getUser(email) - should get a user record using their email
 module.exports.getUser = async (email) => {
-  // if (!mongoose.Types.ObjectId.isValid(email)) {
-  //   return null;
-  // }
   try {
     const user = await User.findOne({ email: email }).lean();
     return user;

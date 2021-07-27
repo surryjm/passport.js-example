@@ -3,7 +3,6 @@ const router = Router();
 const userDAO = require('../daos/user');
 const noteDAO = require('../daos/note');
 const bcrypt = require('bcrypt');
-//const jwt = require('jsonwebtoken');
 
 
 // Signup: POST /login/signup
@@ -25,7 +24,6 @@ router.post("/signup", async (req, res, next) => {
       const savedHash = await bcrypt.hash(password, 10);
       const newUser = await userDAO.createUser({ email, password: savedHash });
       req.user = newUser;
-      //res.status(200).send(newUser);
       res.json(newUser);
     }
   } catch (e) {
@@ -54,7 +52,6 @@ router.post("/", async (req, res, next) => {
       res.sendStatus(401);
     } else {
       const token = await tokenDAO.getTokenForUserId(email);
-      //res.status(200).send({ token: token });
       res.json(token);
     }
   } catch (e) {
@@ -84,11 +81,8 @@ router.post("/password", async (req, res, next) => {
 // POST /logout - If the user is logged in, invalidate their token so they can't use it again (remove it)
 router.post("/logout", async (req, res, next) => {
   try {
-    // token = jwt.sign(data, secret, { expiresIn: '1 second' });
-    // jwt.verify(token, secret);
     let token = req.tokenString;
     await tokenDAO.removeToken(token);
-    //res.sendStatus(200);
   } catch (e) {
     res.sendStatus(401);
     next (e);

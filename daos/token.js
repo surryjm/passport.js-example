@@ -31,11 +31,6 @@ module.exports.getUserIdFromToken = async (tokenString) => {
 // Token record
 module.exports.removeToken = async (tokenString) => {
   return await Token.deleteOne({ token: tokenString });
-  // if (!mongoose.Types.ObjectId.isValid(userId)) {
-  //   return false;
-  // }
-  // await Token.deleteOne({ _id: userId });
-  // return true;
 }
 
 
