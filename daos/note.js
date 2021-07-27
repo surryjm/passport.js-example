@@ -4,30 +4,32 @@ module.exports = {};
 
 // createNote(userId, noteObj) - should create a note for the given user
 module.exports.createNote = async (userId, noteObj) => {
-  if (userId) {
-    try {
-      const note = await Note.create(noteObj);
-      return note;
-    } catch (e) {
-      return null;
-    }
+  try {
+    noteObj.userId = userId;
+    const note = await Note.create(noteObj);
+    return note;
+  } catch (e) {
+    return null;
   }
 }
 
 // getNote(userId, noteId) - should get note for userId and noteId (_id)
 module.exports.getNote = async (userId, noteId) => {
-  if (noteId) {
-    try {
-      return await Note.findOne({ _id: noteId, userId }).lean();
-    } catch (e) {
-      return null;
-    }
+  try {
+    const note = await Note.findOne({ _id: noteId, userId: userId }).lean();
+    return note;
+  } catch (e) {
+    return null;
   }
 }
 
 // getUserNotes(userId) - should get all notes for userId
-module.exports.getUserNotes = (userId) => {
-
+module.exports.getUserNotes = async (userId) => {
+  try {
+    return await Note.find({ userId: userId }).lean();
+  } catch (e) {
+    return null;
+  }
 }
 
 

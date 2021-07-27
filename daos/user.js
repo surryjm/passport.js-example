@@ -13,22 +13,26 @@ module.exports.createUser = async (userObj) => {
 }
 
 // getUser(email) - should get a user record using their email
-module.exports.getUser = (email) => {
+module.exports.getUser = async (email) => {
   // if (!mongoose.Types.ObjectId.isValid(email)) {
   //   return null;
   // }
-  return User.findOne({ email: email }).lean();
+  try {
+    const user = await User.findOne({ email: email }).lean();
+    return user;
+  } catch (e) {
+    return null;
+  }
 }
 
 // updateUserPassword(userId, password) - should update the user's password field
-module.exports.updateUserPassword = (userId, password) => {
-  return User.updateOne({ userId }, password);
-  // try {
-  //   const user = await User.findOneAndUpdate({ _id: userId }, password, { new: true }).lean();
-  //   return user;
-  // } catch (e) {
-  //   return null;
-  // }
+module.exports.updateUserPassword = async (userId, password) => {
+  try {
+    const updatedPassword = await User.updateOne({ _id: userId }, { $set: { password: password }});
+    return updatedPassword;
+  } catch (e) {
+    next (e);
+  }
 }
 
 
