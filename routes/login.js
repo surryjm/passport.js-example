@@ -59,14 +59,14 @@ router.post("/", async (req, res, next) => {
 
 // Change Password POST /login/password
 // POST /password - If the user is logged in, store the incoming password using their userId
-router.post("/password", async (req, res, next) => {
+router.post("/password", isLoggedIn, async (req, res, next) => {
   try {
     const password = req.body.password;
     if (!password || password === '') {
       res.sendStatus(400);
     } else {
       const savedHash = await bcrypt.hash(password, 10);
-      const updatedPassword = await userDAO.updateUserPassword(req.user._id, savedHash);
+      const updatedPassword = await userDAO.updateUserPassword(req.userId, savedHash);
       res.json(updatedPassword);
     }
   } catch (e) {
@@ -77,15 +77,17 @@ router.post("/password", async (req, res, next) => {
 
 // Logout: POST /login/logout
 // POST /logout - If the user is logged in, invalidate their token so they can't use it again (remove it)
-router.post("/logout", async (req, res, next) => {
+router.post("/logout", isLoggedIn, async (req, res, next) => {
   try {
-    let token = req.tokenString;
-    await tokenDAO.removeToken(token);
+    let token = req.headers.authorization.split(' ')[1];
+    const removeToken = await tokenDAO.removeToken(token);
+    res.json(removeToken);
   } catch (e) {
     res.sendStatus(401);
     next (e);
   }
 });
+
 
 //isLoggedIn(req, res, next) - should check if the user 
 //has a valid token and if so make req.userId = the userId 
@@ -95,7 +97,7 @@ router.post("/logout", async (req, res, next) => {
 //and you will need to extract just the token text. 
 //Any route that says "If the user is logged in" should 
 //use this middleware function.
-router.use(async function isLoggedIn(req, res, next) {
+async function isLoggedIn(req, res, next) {
   const bearerToken = req.headers.authorization;
   try {
     if (bearerToken) {
@@ -111,6 +113,6 @@ router.use(async function isLoggedIn(req, res, next) {
   } catch (e) {
     next(e);
   }
-});
+};
 
 module.exports = router;
