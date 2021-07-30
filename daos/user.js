@@ -28,7 +28,7 @@ module.exports.updateUserPassword = async (userId, password) => {
     const updatedPassword = await User.updateOne({ _id: userId }, { $set: { password: password }});
     return updatedPassword;
   } catch (e) {
-    next (e);
+    return null;
   }
 }
 

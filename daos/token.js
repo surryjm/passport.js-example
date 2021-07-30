@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const Token = require('../models/token');
-//const User = require('../models/user');
 const { v4: uuidv4 } = require('uuid');
 module.exports = {};
+
 
 // getTokenForUserId(userId) - should be an async function that returns a string 
 // after creating a Token record
@@ -30,7 +30,12 @@ module.exports.getUserIdFromToken = async (tokenString) => {
 // removeToken(tokenString) - an async function that deletes the corresponding 
 // Token record
 module.exports.removeToken = async (tokenString) => {
-  return await Token.deleteOne({ token: tokenString });
+  try {
+    const removeToken = await Token.deleteOne({ token: tokenString });
+    return removeToken;
+  } catch (e) {
+    next(e);
+  }
 }
 
 

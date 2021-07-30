@@ -3,42 +3,15 @@ const router = Router();
 const noteDAO = require('../daos/note');
 const tokenDAO = require('../daos/token');
 
-async function isLoggedIn(req, res, next) {
-  try {
-    const bearerToken = req.headers.authorization;
-    if (bearerToken) {
-      const tokenString = bearerToken.split(' ')[1];
-      const userId = await tokenDAO.getUserIdFromToken(tokenString);
-      if (userId) {
-        req.userId = userId.userId;
-        next();
-      } else if (!userId) {
-        res.sendStatus(401);
-      }
-    } else if (!bearerToken) {
-      res.sendStatus(401);
-    }
-  } catch (e) {
-    res.sendStatus(401);
-    next();
-  }
-};
-
 // Create: POST /notes
 // POST / - If the user is logged in, 
 // it should store the incoming note along with their userId
 router.post("/", isLoggedIn, async (req, res, next) => {  
-  const userId = req.userId;
-  const note = req.body;
-  if (!note || JSON.stringify(note) === '{}') {
-    return res.sendStatus(400);
-  } else {
-    try {
-      const savedNote = await noteDAO.createNote(userId, note);
-      res.json(savedNote);
-    } catch (e) {
-      next(e);
-    }
+  try {
+    const savedNote = await noteDAO.createNote(req.userId, req.body);
+    res.json(savedNote);
+  } catch (e) {
+    next (e)
   }
 });
 
@@ -59,21 +32,40 @@ router.get("/", isLoggedIn, async (req, res, next) => {
 router.get("/:id", isLoggedIn, async (req, res, next) => {
   try {
     const note = await noteDAO.getNote(req.userId, req.params.id);
-    if (note) {
-      res.json(note);
-    } else {
+    if (!note) {
       res.sendStatus(404);
+    } else {
+      res.json(note);
     }
   } catch (e) {
     next(e);
   }
 });
 
+
+async function isLoggedIn(req, res, next) {
+  try {
+    const bearerToken = req.headers.authorization;
+    if (bearerToken) {
+      const tokenString = bearerToken.split(' ')[1];
+      const userId = await tokenDAO.getUserIdFromToken(tokenString);
+      if (userId) {
+        req.userId = userId.userId;
+        next();
+      } else {
+        res.sendStatus(401);
+      }
+    } else {
+      res.sendStatus(401);
+    }
+  } catch (e) {
+    next();
+  }
+};
+
 router.use(function (err, req, res, next) {
-  if (err.message.includes("invalid")) {
+  if (err.message.includes("Cast to ObjectId failed")) {
     res.status(400).send('Invalid ID provided');
-  } else if (err.message.includes("token")) {
-    res.sendStatus(401);
   } else {
     res.status(500).send('Something broke!');
   }

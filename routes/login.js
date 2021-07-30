@@ -1,19 +1,18 @@
 const { Router } = require("express");
 const router = Router();
 const userDAO = require('../daos/user');
-const noteDAO = require('../daos/note');
+const tokenDAO = require('../daos/token');
 const bcrypt = require('bcrypt');
-
 
 // Signup: POST /login/signup
 // POST /signup - should use bcrypt on the incoming password. 
 // Store user with their email and encrypted password, 
 // handle conflicts when the email is already in use.
 router.post("/signup", async (req, res, next) => {
+  const user = req.body;
+  const email = user.email;
+  const password = user.password;
   try {
-    const user = req.body;
-    const email = user.email;
-    const password = user.password;
     if (!email || !password || email === '' || password === '') {
       res.sendStatus(400);
     }
@@ -23,7 +22,6 @@ router.post("/signup", async (req, res, next) => {
     } else {
       const savedHash = await bcrypt.hash(password, 10);
       const newUser = await userDAO.createUser({ email, password: savedHash });
-      req.user = newUser;
       res.json(newUser);
     }
   } catch (e) {
@@ -51,7 +49,7 @@ router.post("/", async (req, res, next) => {
     if (!match) {
       res.sendStatus(401);
     } else {
-      const token = await tokenDAO.getTokenForUserId(email);
+      const token = await tokenDAO.getTokenForUserId(checkIfExisting._id);
       res.json(token);
     }
   } catch (e) {
@@ -65,11 +63,11 @@ router.post("/password", async (req, res, next) => {
   try {
     const password = req.body.password;
     if (!password || password === '') {
-      return res.sendStatus(400);
+      res.sendStatus(400);
     } else {
       const savedHash = await bcrypt.hash(password, 10);
       const updatedPassword = await userDAO.updateUserPassword(req.user._id, savedHash);
-      res.sendStatus(200);
+      res.json(updatedPassword);
     }
   } catch (e) {
     res.sendStatus(401);
@@ -98,8 +96,8 @@ router.post("/logout", async (req, res, next) => {
 //Any route that says "If the user is logged in" should 
 //use this middleware function.
 router.use(async function isLoggedIn(req, res, next) {
+  const bearerToken = req.headers.authorization;
   try {
-    const bearerToken = req.headers.authorization;
     if (bearerToken) {
       const tokenString = bearerToken.split(' ')[1];
       const userId = await tokenDAO.getUserIdFromToken(tokenString);
