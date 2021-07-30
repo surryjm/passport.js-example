@@ -1,8 +1,8 @@
 const { Router } = require("express");
 const router = Router();
+const bcrypt = require('bcrypt');
 const userDAO = require('../daos/user');
 const tokenDAO = require('../daos/token');
-const bcrypt = require('bcrypt');
 
 // Signup: POST /login/signup
 // POST /signup - should use bcrypt on the incoming password. 
@@ -106,6 +106,8 @@ async function isLoggedIn(req, res, next) {
       if (userId) {
         req.userId = userId.userId;
         next();
+      } else {
+        res.sendStatus(401);
       }
     } else {
       res.sendStatus(401);

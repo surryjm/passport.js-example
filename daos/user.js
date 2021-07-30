@@ -18,7 +18,7 @@ module.exports.getUser = async (email) => {
     const user = await User.findOne({ email: email }).lean();
     return user;
   } catch (e) {
-    return null;
+    next(e);
   }
 }
 
@@ -28,7 +28,7 @@ module.exports.updateUserPassword = async (userId, password) => {
     const updatedPassword = await User.updateOne({ _id: userId }, { $set: { password: password }});
     return updatedPassword;
   } catch (e) {
-    return null;
+    next(e);
   }
 }
 
