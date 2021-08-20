@@ -3,6 +3,8 @@ const router = Router();
 const bcrypt = require('bcrypt');
 const userDAO = require('../daos/user');
 const tokenDAO = require('../daos/token');
+const passport = require('passport');
+const LocalStrategy = require('passport-local');
 
 // Signup: POST /login/signup
 // POST /signup - should use bcrypt on the incoming password. 
